@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Life Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6c5ce7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav id="sidebar">
+  <div class="logo">DASHBOARD</div>
+  <ul>
+    <li class="active" data-module="fitness"><span class="icon">&#9883;</span> Fitness</li>
+    <li data-module="nutrition"><span class="icon">&#9749;</span> Nutrition</li>
+    <li data-module="reminders"><span class="icon">&#9200;</span> Reminders</li>
+    <li data-module="crm"><span class="icon">&#9742;</span> CRM</li>
+    <li data-module="news"><span class="icon">&#9881;</span> Market Intel</li>
+  </ul>
+</nav>
+
+<main id="content">
+  <!-- FITNESS MODULE -->
+  <section id="fitness" class="module active">
+    <h1>Fitness Tracker</h1>
+    <div class="grid-2">
+      <div class="card">
+        <h2>Log Workout</h2>
+        <form id="workout-form">
+          <select id="exercise-select">
+            <option value="">-- Select Exercise --</option>
+            <optgroup label="Chest">
+              <option value="Bench Press">Bench Press</option>
+              <option value="Incline Bench Press">Incline Bench Press</option>
+              <option value="Dumbbell Flyes">Dumbbell Flyes</option>
+              <option value="Push Ups">Push Ups</option>
+            </optgroup>
+            <optgroup label="Back">
+              <option value="Deadlift">Deadlift</option>
+              <option value="Barbell Row">Barbell Row</option>
+              <option value="Pull Ups">Pull Ups</option>
+              <option value="Lat Pulldown">Lat Pulldown</option>
+            </optgroup>
+            <optgroup label="Legs">
+              <option value="Squat">Squat</option>
+              <option value="Leg Press">Leg Press</option>
+              <option value="Romanian Deadlift">Romanian Deadlift</option>
+              <option value="Leg Curl">Leg Curl</option>
+              <option value="Calf Raise">Calf Raise</option>
+            </optgroup>
+            <optgroup label="Shoulders">
+              <option value="Overhead Press">Overhead Press</option>
+              <option value="Lateral Raise">Lateral Raise</option>
+              <option value="Face Pull">Face Pull</option>
+            </optgroup>
+            <optgroup label="Arms">
+              <option value="Barbell Curl">Barbell Curl</option>
+              <option value="Tricep Pushdown">Tricep Pushdown</option>
+              <option value="Hammer Curl">Hammer Curl</option>
+            </optgroup>
+          </select>
+          <input type="text" id="custom-exercise" placeholder="Or type custom exercise...">
+          <div class="row-inputs">
+            <input type="number" id="weight" placeholder="Weight (kg)" step="0.5">
+            <input type="number" id="reps" placeholder="Reps" min="1">
+            <input type="number" id="sets" placeholder="Sets" min="1" value="1">
+          </div>
+          <input type="number" id="rpe" placeholder="RPE (1-10)" min="1" max="10" step="0.5">
+          <button type="submit" class="btn-primary">Log Set</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Coach Suggestion</h2>
+        <div id="coach-advice">
+          <p class="empty-state">Log an exercise to get progressive overload recommendations.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Today's Workout</h2>
+      <table id="today-workout">
+        <thead><tr><th>Exercise</th><th>Weight</th><th>Reps</th><th>Sets</th><th>RPE</th><th>Volume</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p id="today-empty" class="empty-state">No exercises logged today.</p>
+    </div>
+    <div class="card">
+      <h2>Progress Over Time</h2>
+      <select id="progress-exercise-select"><option value="">Select exercise to view progress</option></select>
+      <canvas id="progress-chart"></canvas>
+    </div>
+  </section>
+
+  <!-- NUTRITION MODULE -->
+  <section id="nutrition" class="module">
+    <h1>Nutrition Tracker</h1>
+    <div class="grid-2">
+      <div class="card">
+        <h2>Log Meal</h2>
+        <form id="meal-form">
+          <select id="meal-type">
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Snack">Snack</option>
+          </select>
+          <input type="text" id="food-name" placeholder="Food item" required>
+          <div class="row-inputs">
+            <input type="number" id="food-qty" placeholder="Qty (g/ml)" step="1">
+            <input type="number" id="food-cal" placeholder="Calories" step="1">
+          </div>
+          <div class="row-inputs">
+            <input type="number" id="food-protein" placeholder="Protein (g)" step="0.1">
+            <input type="number" id="food-carbs" placeholder="Carbs (g)" step="0.1">
+            <input type="number" id="food-fat" placeholder="Fat (g)" step="0.1">
+          </div>
+          <button type="submit" class="btn-primary">Add Food</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Daily Summary</h2>
+        <div id="macro-summary">
+          <div class="macro-circle"><span id="total-cal">0</span><label>kcal</label></div>
+          <div class="macro-bars">
+            <div class="macro-row"><span>Protein</span><div class="bar"><div id="bar-protein" class="bar-fill protein"></div></div><span id="total-protein">0g</span></div>
+            <div class="macro-row"><span>Carbs</span><div class="bar"><div id="bar-carbs" class="bar-fill carbs"></div></div><span id="total-carbs">0g</span></div>
+            <div class="macro-row"><span>Fat</span><div class="bar"><div id="bar-fat" class="bar-fill fat"></div></div><span id="total-fat">0g</span></div>
+          </div>
+        </div>
+        <div class="card-sub">
+          <h3>Targets</h3>
+          <div class="row-inputs">
+            <input type="number" id="target-cal" placeholder="Cal target" value="2500">
+            <input type="number" id="target-protein" placeholder="Protein (g)" value="180">
+            <input type="number" id="target-carbs" placeholder="Carbs (g)" value="250">
+            <input type="number" id="target-fat" placeholder="Fat (g)" value="80">
+          </div>
+          <button class="btn-secondary" onclick="saveTargets()">Save Targets</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Today's Meals</h2>
+      <div id="meals-list"></div>
+      <p id="meals-empty" class="empty-state">No meals logged today.</p>
+    </div>
+  </section>
+
+  <!-- REMINDERS MODULE -->
+  <section id="reminders" class="module">
+    <h1>Daily Reminders</h1>
+    <div class="grid-2">
+      <div class="card">
+        <h2>Add Reminder</h2>
+        <form id="reminder-form">
+          <input type="text" id="reminder-text" placeholder="What do you need to do?" required>
+          <div class="row-inputs">
+            <input type="time" id="reminder-time">
+            <select id="reminder-category">
+              <option value="General">General</option>
+              <option value="WhatsApp">WhatsApp Reply</option>
+              <option value="Health">Health</option>
+              <option value="Work">Work</option>
+              <option value="Personal">Personal</option>
+            </select>
+          </div>
+          <label><input type="checkbox" id="reminder-recurring"> Recurring daily</label>
+          <button type="submit" class="btn-primary">Add Reminder</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Quick Add</h2>
+        <div class="quick-reminders">
+          <button class="btn-tag" onclick="quickReminder('Reply to WhatsApp messages','WhatsApp')">WhatsApp Replies</button>
+          <button class="btn-tag" onclick="quickReminder('Drink 2L water','Health')">Water Intake</button>
+          <button class="btn-tag" onclick="quickReminder('Take supplements','Health')">Supplements</button>
+          <button class="btn-tag" onclick="quickReminder('10 min stretch','Health')">Stretch</button>
+          <button class="btn-tag" onclick="quickReminder('Check CRM pipeline','Work')">Check CRM</button>
+          <button class="btn-tag" onclick="quickReminder('Review market news','Work')">Market News</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Today's Reminders</h2>
+      <div id="reminders-list"></div>
+      <p id="reminders-empty" class="empty-state">No reminders set.</p>
+    </div>
+  </section>
+
+  <!-- CRM MODULE -->
+  <section id="crm" class="module">
+    <h1>CRM - Private Banking</h1>
+    <div class="grid-2">
+      <div class="card">
+        <h2>Add Prospect</h2>
+        <form id="prospect-form">
+          <input type="text" id="prospect-name" placeholder="Full Name" required>
+          <input type="text" id="prospect-company" placeholder="Company / Entity">
+          <input type="text" id="prospect-country" placeholder="Country">
+          <div class="row-inputs">
+            <input type="email" id="prospect-email" placeholder="Email">
+            <input type="tel" id="prospect-phone" placeholder="Phone">
+          </div>
+          <select id="prospect-stage">
+            <option value="Lead">Lead</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Meeting Scheduled">Meeting Scheduled</option>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Negotiation">Negotiation</option>
+            <option value="Won">Won</option>
+            <option value="Lost">Lost</option>
+          </select>
+          <input type="text" id="prospect-aum" placeholder="Estimated AUM (USD)">
+          <input type="text" id="prospect-source" placeholder="Source / Referral">
+          <textarea id="prospect-notes" placeholder="Notes..." rows="3"></textarea>
+          <button type="submit" class="btn-primary">Add Prospect</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Pipeline Overview</h2>
+        <div id="pipeline-stats"></div>
+        <canvas id="pipeline-chart" height="200"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2>Prospects</h2>
+        <div class="row-inputs">
+          <input type="text" id="crm-search" placeholder="Search..." oninput="renderProspects()">
+          <select id="crm-filter" onchange="renderProspects()">
+            <option value="">All Stages</option>
+            <option value="Lead">Lead</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Meeting Scheduled">Meeting Scheduled</option>
+            <option value="Proposal Sent">Proposal Sent</option>
+            <option value="Negotiation">Negotiation</option>
+            <option value="Won">Won</option>
+            <option value="Lost">Lost</option>
+          </select>
+        </div>
+      </div>
+      <table id="prospects-table">
+        <thead><tr><th>Name</th><th>Company</th><th>Country</th><th>Stage</th><th>AUM</th><th>Last Contact</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p id="crm-empty" class="empty-state">No prospects yet.</p>
+    </div>
+    <!-- Prospect detail modal -->
+    <div id="prospect-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div id="prospect-detail"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWS MODULE -->
+  <section id="news" class="module">
+    <h1>Market Intelligence</h1>
+    <div class="grid-2">
+      <div class="card">
+        <h2>Add Note / Intel</h2>
+        <form id="news-form">
+          <select id="news-category">
+            <option value="Eastern Europe">Eastern Europe</option>
+            <option value="Global Markets">Global Markets</option>
+            <option value="Founders & Deals">Founders & Deals</option>
+            <option value="Regulatory">Regulatory</option>
+            <option value="Competitor">Competitor Intel</option>
+          </select>
+          <input type="text" id="news-title" placeholder="Headline / Title" required>
+          <textarea id="news-body" placeholder="Details, source, implications..." rows="4"></textarea>
+          <input type="text" id="news-tags" placeholder="Tags (comma separated)">
+          <button type="submit" class="btn-primary">Save Intel</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Quick Links</h2>
+        <div id="quick-links">
+          <a href="https://www.ft.com" target="_blank" class="link-card">Financial Times</a>
+          <a href="https://www.bloomberg.com" target="_blank" class="link-card">Bloomberg</a>
+          <a href="https://www.reuters.com" target="_blank" class="link-card">Reuters</a>
+          <a href="https://emerging-europe.com" target="_blank" class="link-card">Emerging Europe</a>
+          <a href="https://www.bne.eu" target="_blank" class="link-card">BNE IntelliNews</a>
+          <a href="https://balkaninsight.com" target="_blank" class="link-card">Balkan Insight</a>
+        </div>
+        <form id="link-form" style="margin-top:12px">
+          <div class="row-inputs">
+            <input type="text" id="link-name" placeholder="Link name">
+            <input type="url" id="link-url" placeholder="URL">
+          </div>
+          <button type="submit" class="btn-secondary">Add Link</button>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2>Intel Feed</h2>
+        <select id="news-filter" onchange="renderNews()">
+          <option value="">All Categories</option>
+          <option value="Eastern Europe">Eastern Europe</option>
+          <option value="Global Markets">Global Markets</option>
+          <option value="Founders & Deals">Founders & Deals</option>
+          <option value="Regulatory">Regulatory</option>
+          <option value="Competitor">Competitor Intel</option>
+        </select>
+      </div>
+      <div id="news-feed"></div>
+      <p id="news-empty" class="empty-state">No intel saved yet. Start adding market notes above.</p>
+    </div>
+  </section>
+</main>
+
+<nav id="mobile-nav">
+  <button class="mob-tab active" data-module="fitness"><span>&#9883;</span>Fitness</button>
+  <button class="mob-tab" data-module="nutrition"><span>&#9749;</span>Food</button>
+  <button class="mob-tab" data-module="reminders"><span>&#9200;</span>Tasks</button>
+  <button class="mob-tab" data-module="crm"><span>&#9742;</span>CRM</button>
+  <button class="mob-tab" data-module="news"><span>&#9881;</span>Intel</button>
+</nav>
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+document.querySelectorAll('.mob-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mob-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#sidebar li').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.module).classList.add('active');
+    const sideItem = document.querySelector(`#sidebar li[data-module="${btn.dataset.module}"]`);
+    if (sideItem) sideItem.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
